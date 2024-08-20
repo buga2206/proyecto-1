@@ -1,0 +1,17 @@
+C:\Users\User\desktop\Datos 1\proyecto-1\proyecto-1\proyecto\obj\Debug\net8.0-windows\proyecto.csproj.GenerateResource.cache
+C:\Users\User\desktop\Datos 1\proyecto-1\proyecto-1\proyecto\bin\Debug\net8.0-windows\proyecto.exe
+C:\Users\User\desktop\Datos 1\proyecto-1\proyecto-1\proyecto\bin\Debug\net8.0-windows\proyecto.deps.json
+C:\Users\User\desktop\Datos 1\proyecto-1\proyecto-1\proyecto\bin\Debug\net8.0-windows\proyecto.runtimeconfig.json
+C:\Users\User\desktop\Datos 1\proyecto-1\proyecto-1\proyecto\bin\Debug\net8.0-windows\proyecto.dll
+C:\Users\User\desktop\Datos 1\proyecto-1\proyecto-1\proyecto\bin\Debug\net8.0-windows\proyecto.pdb
+C:\Users\User\desktop\Datos 1\proyecto-1\proyecto-1\proyecto\obj\Debug\net8.0-windows\proyecto.Form1.resources
+C:\Users\User\desktop\Datos 1\proyecto-1\proyecto-1\proyecto\obj\Debug\net8.0-windows\proyecto.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\User\desktop\Datos 1\proyecto-1\proyecto-1\proyecto\obj\Debug\net8.0-windows\proyecto.AssemblyInfoInputs.cache
+C:\Users\User\desktop\Datos 1\proyecto-1\proyecto-1\proyecto\obj\Debug\net8.0-windows\proyecto.AssemblyInfo.cs
+C:\Users\User\desktop\Datos 1\proyecto-1\proyecto-1\proyecto\obj\Debug\net8.0-windows\proyecto.csproj.CoreCompileInputs.cache
+C:\Users\User\desktop\Datos 1\proyecto-1\proyecto-1\proyecto\obj\Debug\net8.0-windows\proyecto.sourcelink.json
+C:\Users\User\desktop\Datos 1\proyecto-1\proyecto-1\proyecto\obj\Debug\net8.0-windows\proyecto.dll
+C:\Users\User\desktop\Datos 1\proyecto-1\proyecto-1\proyecto\obj\Debug\net8.0-windows\refint\proyecto.dll
+C:\Users\User\desktop\Datos 1\proyecto-1\proyecto-1\proyecto\obj\Debug\net8.0-windows\proyecto.pdb
+C:\Users\User\desktop\Datos 1\proyecto-1\proyecto-1\proyecto\obj\Debug\net8.0-windows\proyecto.genruntimeconfig.cache
+C:\Users\User\desktop\Datos 1\proyecto-1\proyecto-1\proyecto\obj\Debug\net8.0-windows\ref\proyecto.dll
