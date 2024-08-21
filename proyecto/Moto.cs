@@ -10,7 +10,7 @@
 
         public Moto(Node startNode, int trailValue)
         {
-            CurrentNode = startNode;
+            CurrentNode = startNode ?? throw new ArgumentNullException(nameof(startNode), "Start node cannot be null");
             TrailValue = trailValue;
             CurrentDirection = Direction.Right; // Dirección inicial
             trailNodes = new OwnLinkedList<Node>();
@@ -33,7 +33,7 @@
         public bool Move()
         {
             // Mueve la moto a la siguiente posición según la dirección actual
-            Node nextNode = null;
+            Node? nextNode = null;
 
             switch (CurrentDirection)
             {
@@ -58,14 +58,14 @@
             }
 
             // Añadir el nodo actual a la lista de la estela
-            trailNodes.AddFrist(CurrentNode);
+            trailNodes.AddFirst(CurrentNode);
 
             // Si la estela ha alcanzado su longitud máxima, elimina el último segmento
             if (trailNodes.Count() > MaxTrailLength)
             {
-                Node tailNode = trailNodes[0];
+                Node tailNode = trailNodes[MaxTrailLength]; // Obtener el nodo que se va a eliminar
                 tailNode.Value = 0; // Eliminar la estela visualmente del grid
-                trailNodes.RemoveAt(0); // Remover el último nodo de la lista
+                trailNodes.RemoveAt(MaxTrailLength); // Remover el último nodo de la lista
             }
 
             // Marca el nodo actual como parte de la estela

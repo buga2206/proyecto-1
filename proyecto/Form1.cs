@@ -1,3 +1,7 @@
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
 namespace proyecto
 {
     public partial class Form1 : Form
@@ -13,7 +17,11 @@ namespace proyecto
             gameGrid = new Grid(GridRows, GridColumns);
 
             // Inicializar la moto en una posición de inicio
-            Node startNode = gameGrid.GetNode(5, 5); // Posición inicial de la moto en el centro
+            Node? startNode = gameGrid.GetNode(5, 5); // Posición inicial de la moto en el centro
+            if (startNode == null)
+            {
+                throw new InvalidOperationException("No se pudo encontrar un nodo válido en la posición inicial.");
+            }
             playerMoto = new Moto(startNode, 1); // La moto deja una estela con el valor 1
 
             // Suscribirse al evento KeyDown para manejar el movimiento
@@ -62,7 +70,9 @@ namespace proyecto
             {
                 for (int col = 0; col < GridColumns; col++)
                 {
-                    Node currentNode = gameGrid.GetNode(row, col);
+                    Node? currentNode = gameGrid.GetNode(row, col);
+                    if (currentNode == null) continue;
+
                     PictureBox cellBox = new PictureBox
                     {
                         Width = cellSize,
@@ -102,7 +112,5 @@ namespace proyecto
                 }
             }
         }
-
-
     }
 }

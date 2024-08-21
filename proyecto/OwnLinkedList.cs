@@ -24,6 +24,7 @@ namespace proyecto
         void Clear();
         int Count();
         void Print();
+        T this[int index] { get; } // Agregar definición del indexador en la interfaz
     }
 
     public class OwnLinkedList<T> : ILista<T>
@@ -117,7 +118,7 @@ namespace proyecto
                 return;
             }
 
-            ONode<T> current = this.first;
+            ONode<T>? current = this.first;
             ONode<T>? previous = null;
 
             for (int i = 0; i < index; i++)
@@ -134,6 +135,34 @@ namespace proyecto
             if (previous != null && current != null)
             {
                 previous.Next = current.Next;
+            }
+        }
+
+        public T this[int index] // Implementación del indexador
+        {
+            get
+            {
+                if (index < 0 || index >= Count())
+                {
+                    throw new ArgumentOutOfRangeException(nameof(index), "Index out of range.");
+                }
+
+                ONode<T>? current = first;
+                for (int i = 0; i < index; i++)
+                {
+                    if (current == null)
+                    {
+                        throw new ArgumentOutOfRangeException(nameof(index), "Index out of range.");
+                    }
+                    current = current.Next;
+                }
+
+                if (current == null)
+                {
+                    throw new InvalidOperationException("Node is unexpectedly null.");
+                }
+
+                return current.Value;
             }
         }
 

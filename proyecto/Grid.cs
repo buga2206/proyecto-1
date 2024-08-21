@@ -15,7 +15,6 @@
         }
     }
 
-
     public class Grid
     {
         private Node[,] nodes;
@@ -56,7 +55,7 @@
             }
         }
 
-        public Node GetNode(int row, int col)
+        public Node? GetNode(int row, int col)
         {
             if (row >= 0 && row < rows && col >= 0 && col < columns)
             {
