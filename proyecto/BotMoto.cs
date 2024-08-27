@@ -1,71 +1,36 @@
-﻿namespace proyecto
+﻿using System;
+using System.Timers;
+
+namespace proyecto
 {
     public class BotMoto : Moto
     {
-        private Random random;
-        private Grid grid; // Necesitamos una referencia al grid para eliminar el bot
-        private double turnProbability; // Probabilidad de giro
+        private readonly Grid gameGrid;
+        private readonly double decisionThreshold;
 
-        public BotMoto(Node startNode, int trailValue, Grid grid, double turnProbability = 0.000001) : base(startNode, trailValue)
+        public BotMoto(Node startNode, int trailValue, Grid grid, double decisionThreshold, int velocidad, int tamañoEstela)
+            : base(startNode, trailValue, velocidad, tamañoEstela)
         {
-            this.grid = grid;
-            this.turnProbability = turnProbability; // Inicializar la probabilidad de giro
-            random = new Random();
+            this.gameGrid = grid;
+            this.decisionThreshold = decisionThreshold;
         }
 
-        public bool MoveBot()
+        protected override void OnMoveTimerElapsed(object? sender, ElapsedEventArgs e)
         {
-            // Intentar mover el bot
-            TryRandomTurn();
-
-            // Mover el bot utilizando la lógica ya existente en Moto
-            if (!Move())
+            Random rand = new Random();
+            if (rand.NextDouble() < decisionThreshold)
             {
-                // Si el movimiento falla (colisión), devolver false para indicar destrucción
-                return false;
+                ChangeDirection(RandomDirection());
             }
 
-            return true;
+            base.OnMoveTimerElapsed(sender, e);
         }
 
-        private void TryRandomTurn()
+        private Direction RandomDirection()
         {
-            // Intentar girar solo si se cumple la probabilidad
-            if (random.NextDouble() < turnProbability)
-            {
-                // Obtener todas las direcciones posibles
-                List<Direction> possibleDirections = new List<Direction>();
-
-                if (CanMoveTo(CurrentNode.Up))
-                {
-                    possibleDirections.Add(Direction.Up);
-                }
-                if (CanMoveTo(CurrentNode.Down))
-                {
-                    possibleDirections.Add(Direction.Down);
-                }
-                if (CanMoveTo(CurrentNode.Left))
-                {
-                    possibleDirections.Add(Direction.Left);
-                }
-                if (CanMoveTo(CurrentNode.Right))
-                {
-                    possibleDirections.Add(Direction.Right);
-                }
-
-                // Si hay direcciones posibles, elegir una aleatoriamente
-                if (possibleDirections.Count > 0)
-                {
-                    Direction newDirection = possibleDirections[random.Next(possibleDirections.Count)];
-                    ChangeDirection(newDirection); // Usamos el método de la clase base
-                }
-            }
-        }
-
-        private bool CanMoveTo(Node? node)
-        {
-            // Verifica si el nodo es transitable (no es null y no tiene estela ni obstáculo)
-            return node != null && node.Value == 0;
+            Random rand = new Random();
+            Array directions = Enum.GetValues(typeof(Direction));
+            return (Direction)directions.GetValue(rand.Next(directions.Length))!;
         }
     }
 }
