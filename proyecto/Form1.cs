@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace proyecto
 {
@@ -28,6 +29,7 @@ namespace proyecto
             imageCache = LoadImageCache();
 
             InitializeGrid();
+            RenderGrid();
             InitializeUI();
 
             Node? startNode = gameGrid.GetNode(20, 20);
@@ -43,7 +45,7 @@ namespace proyecto
             this.KeyDown += new KeyEventHandler(Form1_KeyDown);
             this.Focus();
 
-            RenderGrid();
+            //RenderGrid();
         }
 
         private Dictionary<int, Image> LoadImageCache()
@@ -110,28 +112,28 @@ namespace proyecto
 
             if (botStartNode1 != null)
             {
-                BotMoto bot1 = new BotMoto(botStartNode1, 2, gameGrid, 0.2, 300, 3);
+                BotMoto bot1 = new BotMoto(botStartNode1, 3, gameGrid, 0.1, 600, 3);
                 bot1.ChangeDirection(Direction.Down);
                 bots.Add(bot1);
             }
 
             if (botStartNode2 != null)
             {
-                BotMoto bot2 = new BotMoto(botStartNode2, 2, gameGrid, 0.4, 300, 3);
+                BotMoto bot2 = new BotMoto(botStartNode2, 2, gameGrid, 0.1, 600, 3);
                 bot2.ChangeDirection(Direction.Down);
                 bots.Add(bot2);
             }
 
             if (botStartNode3 != null)
             {
-                BotMoto bot3 = new BotMoto(botStartNode3, 2, gameGrid, 0.3, 300, 3);
+                BotMoto bot3 = new BotMoto(botStartNode3, 2, gameGrid, 0.1, 600, 3);
                 bot3.ChangeDirection(Direction.Down);
                 bots.Add(bot3);
             }
 
             if (botStartNode4 != null)
             {
-                BotMoto bot4 = new BotMoto(botStartNode4, 2, gameGrid, 0.1, 300, 3);
+                BotMoto bot4 = new BotMoto(botStartNode4, 2, gameGrid, 0.1, 600, 3);
                 bot4.ChangeDirection(Direction.Down);
                 bots.Add(bot4);
             }
@@ -139,38 +141,43 @@ namespace proyecto
 
         private void GenerateItemsAndPowers()
         {
+            gameGrid.ResetGrid(); // Resetea el grid antes de generar nuevos ítems
+
             Random rand = new Random();
             for (int row = 0; row < GridRows; row++)
             {
                 for (int col = 0; col < GridColumns; col++)
                 {
                     Node? currentNode = gameGrid.GetNode(row, col);
-                    if (currentNode != null && currentNode.Value == 0)
+                    if (currentNode != null && currentNode.Value == 0) // Asegurando que sólo los nodos vacíos puedan recibir un ítem
                     {
                         double itemProbability = rand.NextDouble();
 
-                        if (itemProbability < 0.05)
+                        if (itemProbability < 0.05) // Genera un ítem con una probabilidad del 5%
                         {
                             int itemType = rand.Next(1, 6);
 
                             switch (itemType)
                             {
                                 case 1:
-                                    currentNode.Value = 3; // Este valor debería ser el correspondiente al gas
+                                    currentNode.Value = 3; // Gas
+                                    Debug.WriteLine($"Gas generated at [{row},{col}]");
                                     break;
                                 case 2:
-                                    currentNode.Value = 4;
+                                    currentNode.Value = 4; // Escudo
                                     break;
                                 case 3:
-                                    currentNode.Value = 5;
+                                    currentNode.Value = 5; // HiperVelocidad
                                     break;
                                 case 4:
-                                    currentNode.Value = 8;
+                                    currentNode.Value = 8; // Bomba
                                     break;
                                 case 5:
-                                    currentNode.Value = 9;
+                                    currentNode.Value = 9; // Crecimiento de Estela
                                     break;
                             }
+
+                            Debug.WriteLine($"Item generated at [{row},{col}]: Type {currentNode.Value}");
                         }
                     }
                 }
@@ -178,6 +185,8 @@ namespace proyecto
 
             RenderGrid();
         }
+
+
 
 
         private void Form1_KeyDown(object? sender, KeyEventArgs e)

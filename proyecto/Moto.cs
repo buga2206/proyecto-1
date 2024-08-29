@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Timers;
+using System.Diagnostics;
 
 namespace proyecto
 {
@@ -103,7 +104,7 @@ namespace proyecto
 
         private bool IsCollision(Node? nextNode)
         {
-            return nextNode == null || (nextNode.Value != 0 && nextNode.Value != 4 && nextNode.Value != 5 && nextNode.Value != 8 && nextNode.Value != 9);
+            return nextNode == null || (nextNode.Value != 0 && nextNode.Value != 3 && nextNode.Value != 4 && nextNode.Value != 5 && nextNode.Value != 8 && nextNode.Value != 9);
         }
 
         private void UpdateTrail()
@@ -127,12 +128,20 @@ namespace proyecto
 
         private void HandlePower(Node nextNode)
         {
-            Console.WriteLine($"Node value detected: {nextNode.Value}"); // Línea de depuración
+            if (nextNode.Value == 0)
+            {
+                // Nodo vacío, no hacer nada
+                return;
+            }
+
+            Debug.WriteLine($"Node value detected: {nextNode.Value}"); // Línea de depuración
 
             switch (nextNode.Value)
             {
                 case 3:
-                    ShowPowerMessage("Gas"); // Asegúrate de que esto se llama
+                    ShowPowerMessage("Gas");
+                    Debug.WriteLine("Gas detected and applied"); // Mensaje de depuración adicional
+                    AplicarGas(); // Método para aplicar el efecto del gas
                     break;
                 case 4:
                     ShowPowerMessage("Escudo");
@@ -147,12 +156,21 @@ namespace proyecto
                     ShowPowerMessage("Crecimiento de Estela");
                     break;
                 default:
-                    Console.WriteLine("Unhandled node value"); // Para valores no manejados
+                    Debug.WriteLine($"Unhandled node value: {nextNode.Value} at position [{CurrentNode.Value}]"); // Muestra el valor no manejado
                     break;
             }
 
             nextNode.Value = 0; // Resetea el nodo después de recoger el ítem/poder
         }
+
+
+
+        private void AplicarGas()
+        {
+            Combustible = Math.Min(Combustible + 20, 100); // Incrementa el combustible hasta un máximo de 100
+            Debug.WriteLine($"Nuevo nivel de combustible: {Combustible}");
+        }
+
 
 
 
@@ -174,6 +192,7 @@ namespace proyecto
             if (distanceTravelled >= 5)
             {
                 Combustible--;
+                Debug.WriteLine($"el combistible es de {Combustible}");
                 distanceTravelled = 0;
             }
         }

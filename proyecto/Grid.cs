@@ -39,6 +39,11 @@
                 }
             }
 
+            SetNodeReferences();
+        }
+
+        private void SetNodeReferences()
+        {
             for (int row = 0; row < rows; row++)
             {
                 for (int col = 0; col < columns; col++)
@@ -55,6 +60,17 @@
             }
         }
 
+        public void ResetGrid()
+        {
+            for (int row = 0; row < rows; row++)
+            {
+                for (int col = 0; col < columns; col++)
+                {
+                    nodes[row, col].Value = 0; // Resetea cada nodo a vacío
+                }
+            }
+        }
+
         public Node? GetNode(int row, int col)
         {
             if (row >= 0 && row < rows && col >= 0 && col < columns)
@@ -64,4 +80,6 @@
             return null; // Devuelve null si las coordenadas están fuera del rango
         }
     }
+
+
 }
