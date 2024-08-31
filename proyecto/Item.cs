@@ -9,7 +9,7 @@
     {
         public override void Aplicar(Moto moto)
         {
-            moto.Combustible = Math.Min(moto.Combustible + 20, 100);
+            moto.IncrementarCombustible(20);  // Aumenta el combustible en 20 unidades, sin exceder 100
         }
     }
 
@@ -18,16 +18,15 @@
         public override void Aplicar(Moto moto)
         {
             moto.TamañoEstela += 1;
+            moto.ActualizarMaxTrailLength();
         }
     }
 
     public class Bomba : Item
     {
-
         public override void Aplicar(Moto moto)
         {
-            // Lógica para destruir la moto o aplicar el daño correspondiente
-            moto.Combustible = 0; // Por ejemplo, se puede vaciar el combustible o destruirla
+            moto.Combustible = 0;
         }
     }
 }

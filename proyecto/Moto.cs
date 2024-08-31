@@ -20,13 +20,14 @@ namespace proyecto
         public Direction CurrentDirection { get; private set; }
         private OwnLinkedList<Node> trailNodes;
         private int distanceTravelled;
-        private const int MaxTrailLength = 3;
+        private int MaxTrailLength;
 
         public int Combustible { get; set; }
         public int Velocidad { get; private set; }
         public int TamañoEstela { get; set; }
 
         protected System.Timers.Timer moveTimer;
+        private OwnQueueList<Item> itemsQueue;
 
         public Moto(Node startNode, int trailValue, int velocidad, int tamañoEstela, int trailHeadValue, int combustible = 100)
         {
@@ -35,11 +36,12 @@ namespace proyecto
             trailHead = trailHeadValue;
             Velocidad = velocidad;
             TamañoEstela = tamañoEstela;
+            MaxTrailLength = tamañoEstela;
             Combustible = combustible;
             CurrentDirection = Direction.Right;
             trailNodes = new OwnLinkedList<Node>();
+            itemsQueue = new OwnQueueList<Item>();
 
-            // Inicializar el temporizador pero no iniciarlo inmediatamente
             moveTimer = new System.Timers.Timer(velocidad);
             moveTimer.Elapsed += OnMoveTimerElapsed;
             moveTimer.AutoReset = true;
@@ -71,8 +73,14 @@ namespace proyecto
             }
         }
 
-        public virtual bool Move()  // Método virtual para permitir la sobrescritura en BotMoto
+        public virtual bool Move()
         {
+            if (Combustible <= 0)
+            {
+                StopMovement();
+                return false;
+            }
+
             Node? nextNode = GetNextNode();
 
             if (IsCollision(nextNode))
@@ -83,7 +91,7 @@ namespace proyecto
 
             if (nextNode != null)
             {
-                HandlePower(nextNode);
+                HandleItem(nextNode);
                 UpdateTrail();
                 MoveToNextNode(nextNode);
                 UpdateCombustible();
@@ -106,33 +114,8 @@ namespace proyecto
 
         private bool IsCollision(Node? nextNode)
         {
-            if (nextNode == null)
-                return true; // Colisión con los bordes del grid
-
-            int nextNodeValue = nextNode.Value;
-
-            // Colisiones con las cabezas de los bots o jugadores
-            if (nextNodeValue >= 6 && nextNodeValue <= 15)
-            {
-                return true;
-            }
-
-            // Colisiones con las estelas de los bots o jugadores
-            if (nextNodeValue >= 10 && nextNodeValue <= 17)
-            {
-                return true;
-            }
-
-            // No colisiona con ítems y poderes (valores 1-5)
-            if (nextNodeValue >= 1 && nextNodeValue <= 5)
-            {
-                return false;
-            }
-
-            // Cualquier otro valor que no esté manejado explícitamente
-            return false;
+            return nextNode == null || (nextNode.Value != 0 && nextNode.Value != 1 && nextNode.Value != 2 && nextNode.Value != 3 && nextNode.Value != 4 && nextNode.Value != 5);
         }
-
 
         private void UpdateTrail()
         {
@@ -153,33 +136,45 @@ namespace proyecto
             CurrentNode.Value = trailHead;
         }
 
-        private void HandlePower(Node nextNode)
+        private void HandleItem(Node nextNode)
         {
             if (nextNode.Value == 0)
             {
                 return;
             }
 
-            switch (nextNode.Value)
-            {
-                case 1:
-                    Debug.WriteLine("Gas applied");
-                    break;
-                case 2:
-                    Debug.WriteLine("Trail growth applied");
-                    break;
-                case 3:
-                    Debug.WriteLine("Bomb applied");
-                    break;
-                case 4:
-                    Debug.WriteLine("Velocity applied");
-                    break;
-                case 5:
-                    Debug.WriteLine("Shield applied");
-                    break;
-            }
+            Item collectedItem = GetItemFromValue(nextNode.Value);
+            itemsQueue.Enqueue(collectedItem);
+            ApplyItem(itemsQueue.Dequeue());
 
             nextNode.Value = 0;
+        }
+
+        private Item GetItemFromValue(int value)
+        {
+            return value switch
+            {
+                1 => new CeldaDeCombustible(),
+                2 => new CrecimientoEstela(),
+                3 => new Bomba(),
+                _ => throw new ArgumentException("Tipo de ítem no reconocido")
+            };
+        }
+
+        private void ApplyItem(Item item)
+        {
+            item.Aplicar(this);
+        }
+
+        public void ActualizarMaxTrailLength()
+        {
+            MaxTrailLength = TamañoEstela;
+        }
+
+        public void IncrementarCombustible(int cantidad)
+        {
+            Combustible = Math.Min(Combustible + cantidad, 100);  // Aumenta el combustible sin exceder 100
+            Debug.WriteLine($"Combustible incrementado a: {Combustible}");
         }
 
         private void UpdateCombustible()
@@ -189,7 +184,18 @@ namespace proyecto
             {
                 Combustible--;
                 distanceTravelled = 0;
+
+                if (Combustible <= 0)
+                {
+                    StopMovement();
+                }
             }
+        }
+
+        private void StopMovement()
+        {
+            moveTimer.Stop();
+            Debug.WriteLine("Moto detenida por falta de combustible");
         }
 
         public void StartTimer()

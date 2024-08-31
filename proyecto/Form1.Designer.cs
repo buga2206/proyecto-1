@@ -40,7 +40,7 @@ namespace proyecto
             this.MaximizeBox = false;
             this.BackColor = System.Drawing.Color.FromArgb(0, 0, 0);  // Color negro
             this.Name = "Form1";
-            this.Text = "Juego de Motos";
+            this.Text = "Tron by Burger";
             this.ResumeLayout(false);
         }
 
