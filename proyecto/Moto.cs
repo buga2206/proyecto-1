@@ -4,14 +4,6 @@ using System.Diagnostics;
 
 namespace proyecto
 {
-    public enum Direction
-    {
-        Up,
-        Down,
-        Left,
-        Right
-    }
-
     public class Moto
     {
         public Node CurrentNode { get; private set; }
@@ -25,16 +17,22 @@ namespace proyecto
         public int Combustible { get; set; }
         public int Velocidad { get; private set; }
         public int TamañoEstela { get; set; }
+        public int NivelVelocidad { get; private set; }
+        private bool tieneEscudo;
+        private System.Timers.Timer? escudoTimer; // Especificar System.Timers.Timer y permitir nulabilidad
+        private System.Timers.Timer? poderDelayTimer; // Especificar System.Timers.Timer y permitir nulabilidad
 
-        protected System.Timers.Timer moveTimer;
+        protected System.Timers.Timer moveTimer; // Especificar System.Timers.Timer
         private OwnQueueList<Item> itemsQueue;
+        private readonly OwnStackList<Poder> poderesStack;
 
-        public Moto(Node startNode, int trailValue, int velocidad, int tamañoEstela, int trailHeadValue, int combustible = 100)
+        public Moto(Node startNode, int trailValue, int nivelVelocidad, int tamañoEstela, int trailHeadValue, int combustible = 100)
         {
             CurrentNode = startNode ?? throw new ArgumentNullException(nameof(startNode), "Start node cannot be null");
             TrailValue = trailValue;
             trailHead = trailHeadValue;
-            Velocidad = velocidad;
+            NivelVelocidad = nivelVelocidad;
+            Velocidad = GetVelocidadPorNivel(NivelVelocidad);
             TamañoEstela = tamañoEstela;
             MaxTrailLength = tamañoEstela;
             Combustible = combustible;
@@ -42,9 +40,21 @@ namespace proyecto
             trailNodes = new OwnLinkedList<Node>();
             itemsQueue = new OwnQueueList<Item>();
 
-            moveTimer = new System.Timers.Timer(velocidad);
+            poderesStack = new OwnStackList<Poder>();
+            InitializePoderDelayTimer();
+
+            moveTimer = new System.Timers.Timer(Velocidad); // Especificar System.Timers.Timer
             moveTimer.Elapsed += OnMoveTimerElapsed;
             moveTimer.AutoReset = true;
+
+            tieneEscudo = false;
+        }
+
+        private void InitializePoderDelayTimer()
+        {
+            poderDelayTimer = new System.Timers.Timer(1000); // Especificar System.Timers.Timer
+            poderDelayTimer.Elapsed += OnPoderDelayElapsed;
+            poderDelayTimer.AutoReset = false;
         }
 
         protected virtual void OnMoveTimerElapsed(object? sender, ElapsedEventArgs e)
@@ -92,6 +102,7 @@ namespace proyecto
             if (nextNode != null)
             {
                 HandleItem(nextNode);
+                HandlePoder(nextNode);
                 UpdateTrail();
                 MoveToNextNode(nextNode);
                 UpdateCombustible();
@@ -114,6 +125,12 @@ namespace proyecto
 
         private bool IsCollision(Node? nextNode)
         {
+            if (tieneEscudo)
+            {
+                // Si tiene escudo, no colisiona con ningún nodo
+                return nextNode == null;
+            }
+            // Sin escudo, colisiona con cualquier nodo que no sea vacío, gas, incremento de estela, bomba, hiper velocidad o escudo
             return nextNode == null || (nextNode.Value != 0 && nextNode.Value != 1 && nextNode.Value != 2 && nextNode.Value != 3 && nextNode.Value != 4 && nextNode.Value != 5);
         }
 
@@ -138,16 +155,23 @@ namespace proyecto
 
         private void HandleItem(Node nextNode)
         {
-            if (nextNode.Value == 0)
+            if (nextNode.Value >= 1 && nextNode.Value <= 3)
             {
-                return;
+                Item collectedItem = GetItemFromValue(nextNode.Value);
+                itemsQueue.Enqueue(collectedItem);
+                ApplyItem(itemsQueue.Dequeue());
+                nextNode.Value = 0;
             }
+        }
 
-            Item collectedItem = GetItemFromValue(nextNode.Value);
-            itemsQueue.Enqueue(collectedItem);
-            ApplyItem(itemsQueue.Dequeue());
-
-            nextNode.Value = 0;
+        private void HandlePoder(Node nextNode)
+        {
+            if (nextNode.Value >= 4 && nextNode.Value <= 5)
+            {
+                Poder collectedPoder = GetPoderFromValue(nextNode.Value);
+                AplicarPoderConDelay(collectedPoder);
+                nextNode.Value = 0;
+            }
         }
 
         private Item GetItemFromValue(int value)
@@ -161,9 +185,59 @@ namespace proyecto
             };
         }
 
+        private Poder GetPoderFromValue(int value)
+        {
+            return value switch
+            {
+                4 => new HiperVelocidad(),
+                5 => new Escudo(),
+                _ => throw new ArgumentException("Tipo de poder no reconocido")
+            };
+        }
+
         private void ApplyItem(Item item)
         {
             item.Aplicar(this);
+        }
+
+        public void AplicarPoderConDelay(Poder poder)
+        {
+            poderesStack.Push(poder);
+            poderDelayTimer?.Start(); // Usar el temporizador con nulabilidad
+        }
+
+        private void OnPoderDelayElapsed(object? sender, ElapsedEventArgs e)
+        {
+            if (poderesStack.Count() > 0)
+            {
+                Poder poder = poderesStack.Pop();
+                poder.Aplicar(this);
+                Debug.WriteLine("Poder aplicado después de 1 segundo de delay");
+            }
+        }
+
+        public void AplicarHiperVelocidad()
+        {
+            NivelVelocidad = Math.Min(NivelVelocidad + 4, 10);
+            Velocidad = GetVelocidadPorNivel(NivelVelocidad);
+            moveTimer.Interval = Velocidad;
+        }
+
+        public void ActivarEscudo(int duracion)
+        {
+            tieneEscudo = true;
+
+            escudoTimer = new System.Timers.Timer(duracion * 1000); // Especificar System.Timers.Timer
+            escudoTimer.Elapsed += (sender, e) => DesactivarEscudo();
+            escudoTimer.AutoReset = false;
+            escudoTimer.Start();
+        }
+
+        private void DesactivarEscudo()
+        {
+            tieneEscudo = false;
+            escudoTimer?.Stop();
+            escudoTimer?.Dispose();
         }
 
         public void ActualizarMaxTrailLength()
@@ -173,7 +247,7 @@ namespace proyecto
 
         public void IncrementarCombustible(int cantidad)
         {
-            Combustible = Math.Min(Combustible + cantidad, 100);  // Aumenta el combustible sin exceder 100
+            Combustible = Math.Min(Combustible + cantidad, 100);
             Debug.WriteLine($"Combustible incrementado a: {Combustible}");
         }
 
@@ -207,6 +281,16 @@ namespace proyecto
         {
             moveTimer.Stop();
             moveTimer.Dispose();
+        }
+
+        private int GetVelocidadPorNivel(int nivelVelocidad)
+        {
+            if (nivelVelocidad < 1 || nivelVelocidad > 10)
+            {
+                throw new ArgumentOutOfRangeException(nameof(nivelVelocidad), "Nivel de velocidad no válido. Debe estar entre 1 y 10.");
+            }
+
+            return 1300 - (nivelVelocidad - 1) * 100;
         }
     }
 }

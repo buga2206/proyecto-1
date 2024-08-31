@@ -5,21 +5,26 @@
         public abstract void Aplicar(Moto moto);
     }
 
-    public class Escudo : Poder
-    {
-        public override void Aplicar(Moto moto)
-        {
-            // Lógica para aplicar el escudo (si decides implementarlo más adelante)
-        }
-    }
-
     public class HiperVelocidad : Poder
     {
         public override void Aplicar(Moto moto)
         {
-            // Lógica para aplicar la hiper velocidad (si decides implementarlo más adelante)
+            moto.AplicarHiperVelocidad();
         }
     }
 
-    // Otros poderes aquí...
+    public class Escudo : Poder
+    {
+        private readonly int duracion;
+
+        public Escudo(int duracionSegundos = 5)
+        {
+            duracion = duracionSegundos;
+        }
+
+        public override void Aplicar(Moto moto)
+        {
+            moto.ActivarEscudo(duracion);
+        }
+    }
 }
