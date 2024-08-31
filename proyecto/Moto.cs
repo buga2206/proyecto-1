@@ -16,6 +16,7 @@ namespace proyecto
     {
         public Node CurrentNode { get; private set; }
         public int TrailValue { get; private set; }
+        public int trailHead;
         public Direction CurrentDirection { get; private set; }
         private OwnLinkedList<Node> trailNodes;
         private int distanceTravelled;
@@ -27,20 +28,21 @@ namespace proyecto
 
         protected System.Timers.Timer moveTimer;
 
-        public Moto(Node startNode, int trailValue, int velocidad, int tamañoEstela, int combustible = 100)
+        public Moto(Node startNode, int trailValue, int velocidad, int tamañoEstela, int trailHeadValue, int combustible = 100)
         {
             CurrentNode = startNode ?? throw new ArgumentNullException(nameof(startNode), "Start node cannot be null");
             TrailValue = trailValue;
+            trailHead = trailHeadValue;
             Velocidad = velocidad;
             TamañoEstela = tamañoEstela;
             Combustible = combustible;
             CurrentDirection = Direction.Right;
             trailNodes = new OwnLinkedList<Node>();
 
+            // Inicializar el temporizador pero no iniciarlo inmediatamente
             moveTimer = new System.Timers.Timer(velocidad);
             moveTimer.Elapsed += OnMoveTimerElapsed;
             moveTimer.AutoReset = true;
-            moveTimer.Start();
         }
 
         protected virtual void OnMoveTimerElapsed(object? sender, ElapsedEventArgs e)
@@ -69,7 +71,7 @@ namespace proyecto
             }
         }
 
-        public bool Move()
+        public virtual bool Move()  // Método virtual para permitir la sobrescritura en BotMoto
         {
             Node? nextNode = GetNextNode();
 
@@ -104,8 +106,33 @@ namespace proyecto
 
         private bool IsCollision(Node? nextNode)
         {
-            return nextNode == null || (nextNode.Value != 0 && nextNode.Value != 3 && nextNode.Value != 4 && nextNode.Value != 5 && nextNode.Value != 8 && nextNode.Value != 9);
+            if (nextNode == null)
+                return true; // Colisión con los bordes del grid
+
+            int nextNodeValue = nextNode.Value;
+
+            // Colisiones con las cabezas de los bots o jugadores
+            if (nextNodeValue >= 6 && nextNodeValue <= 15)
+            {
+                return true;
+            }
+
+            // Colisiones con las estelas de los bots o jugadores
+            if (nextNodeValue >= 10 && nextNodeValue <= 17)
+            {
+                return true;
+            }
+
+            // No colisiona con ítems y poderes (valores 1-5)
+            if (nextNodeValue >= 1 && nextNodeValue <= 5)
+            {
+                return false;
+            }
+
+            // Cualquier otro valor que no esté manejado explícitamente
+            return false;
         }
+
 
         private void UpdateTrail()
         {
@@ -123,67 +150,36 @@ namespace proyecto
         {
             CurrentNode.Value = TrailValue;
             CurrentNode = nextNode!;
-            CurrentNode.Value = 6;
+            CurrentNode.Value = trailHead;
         }
 
         private void HandlePower(Node nextNode)
         {
             if (nextNode.Value == 0)
             {
-                // Nodo vacío, no hacer nada
                 return;
             }
 
-            Debug.WriteLine($"Node value detected: {nextNode.Value}"); // Línea de depuración
-
             switch (nextNode.Value)
             {
+                case 1:
+                    Debug.WriteLine("Gas applied");
+                    break;
+                case 2:
+                    Debug.WriteLine("Trail growth applied");
+                    break;
                 case 3:
-                    ShowPowerMessage("Gas");
-                    Debug.WriteLine("Gas detected and applied"); // Mensaje de depuración adicional
-                    AplicarGas(); // Método para aplicar el efecto del gas
+                    Debug.WriteLine("Bomb applied");
                     break;
                 case 4:
-                    ShowPowerMessage("Escudo");
+                    Debug.WriteLine("Velocity applied");
                     break;
                 case 5:
-                    ShowPowerMessage("HiperVelocidad");
-                    break;
-                case 8:
-                    ShowPowerMessage("Bomba");
-                    break;
-                case 9:
-                    ShowPowerMessage("Crecimiento de Estela");
-                    break;
-                default:
-                    Debug.WriteLine($"Unhandled node value: {nextNode.Value} at position [{CurrentNode.Value}]"); // Muestra el valor no manejado
+                    Debug.WriteLine("Shield applied");
                     break;
             }
 
-            nextNode.Value = 0; // Resetea el nodo después de recoger el ítem/poder
-        }
-
-
-
-        private void AplicarGas()
-        {
-            Combustible = Math.Min(Combustible + 20, 100); // Incrementa el combustible hasta un máximo de 100
-            Debug.WriteLine($"Nuevo nivel de combustible: {Combustible}");
-        }
-
-
-
-
-        private void ShowPowerMessage(string powerName)
-        {
-            if (Application.OpenForms.Count > 0)
-            {
-                Form1? form = Application.OpenForms[0] as Form1;
-                form?.Invoke(new Action(() =>
-                {
-                    form.powerMessageLabel.Text = $"Poder encontrado: {powerName}";
-                }));
-            }
+            nextNode.Value = 0;
         }
 
         private void UpdateCombustible()
@@ -192,15 +188,19 @@ namespace proyecto
             if (distanceTravelled >= 5)
             {
                 Combustible--;
-                Debug.WriteLine($"el combistible es de {Combustible}");
                 distanceTravelled = 0;
             }
         }
 
+        public void StartTimer()
+        {
+            moveTimer.Start();
+        }
+
         public void StopTimer()
         {
-            moveTimer?.Stop();
-            moveTimer?.Dispose();
+            moveTimer.Stop();
+            moveTimer.Dispose();
         }
     }
 }
