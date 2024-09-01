@@ -28,6 +28,9 @@ namespace proyecto
             base.OnMoveTimerElapsed(sender, e);
         }
 
+        
+
+
         private Direction GetBestDirection()
         {
             // Aquí podrías implementar una lógica más avanzada para determinar la mejor dirección,

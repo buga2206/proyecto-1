@@ -19,10 +19,10 @@ namespace proyecto
         public int TamañoEstela { get; set; }
         public int NivelVelocidad { get; private set; }
         private bool tieneEscudo;
-        private System.Timers.Timer? escudoTimer; // Especificar System.Timers.Timer y permitir nulabilidad
-        private System.Timers.Timer? poderDelayTimer; // Especificar System.Timers.Timer y permitir nulabilidad
+        private System.Timers.Timer? escudoTimer;
+        private System.Timers.Timer? poderDelayTimer;
 
-        protected System.Timers.Timer moveTimer; // Especificar System.Timers.Timer
+        protected System.Timers.Timer moveTimer;
         private OwnQueueList<Item> itemsQueue;
         private readonly OwnStackList<Poder> poderesStack;
 
@@ -43,7 +43,7 @@ namespace proyecto
             poderesStack = new OwnStackList<Poder>();
             InitializePoderDelayTimer();
 
-            moveTimer = new System.Timers.Timer(Velocidad); // Especificar System.Timers.Timer
+            moveTimer = new System.Timers.Timer(Velocidad);
             moveTimer.Elapsed += OnMoveTimerElapsed;
             moveTimer.AutoReset = true;
 
@@ -52,7 +52,7 @@ namespace proyecto
 
         private void InitializePoderDelayTimer()
         {
-            poderDelayTimer = new System.Timers.Timer(1000); // Especificar System.Timers.Timer
+            poderDelayTimer = new System.Timers.Timer(1000);
             poderDelayTimer.Elapsed += OnPoderDelayElapsed;
             poderDelayTimer.AutoReset = false;
         }
@@ -83,7 +83,7 @@ namespace proyecto
             }
         }
 
-        public virtual bool Move()
+        public bool Move()
         {
             if (Combustible <= 0)
             {
@@ -96,6 +96,7 @@ namespace proyecto
             if (IsCollision(nextNode))
             {
                 moveTimer.Stop();
+                ClearTrail();  // Clear the trail before stopping the moto
                 return false;
             }
 
@@ -127,11 +128,26 @@ namespace proyecto
         {
             if (tieneEscudo)
             {
-                // Si tiene escudo, no colisiona con ningún nodo
                 return nextNode == null;
             }
-            // Sin escudo, colisiona con cualquier nodo que no sea vacío, gas, incremento de estela, bomba, hiper velocidad o escudo
-            return nextNode == null || (nextNode.Value != 0 && nextNode.Value != 1 && nextNode.Value != 2 && nextNode.Value != 3 && nextNode.Value != 4 && nextNode.Value != 5);
+
+            if (nextNode == null || (nextNode.Value != 0 && nextNode.Value != 1 && nextNode.Value != 2 && nextNode.Value != 3 && nextNode.Value != 4 && nextNode.Value != 5))
+            {
+                // Collision detected, return true to stop the moto
+                return true;
+            }
+
+            return false;
+        }
+
+        private void ClearTrail()
+        {
+            foreach (var node in trailNodes)
+            {
+                node.Value = 0; // Clear the trail in the grid
+            }
+            CurrentNode.Value = 0;
+            trailNodes.Clear(); // Clear the trail in the linked list
         }
 
         private void UpdateTrail()
@@ -203,7 +219,7 @@ namespace proyecto
         public void AplicarPoderConDelay(Poder poder)
         {
             poderesStack.Push(poder);
-            poderDelayTimer?.Start(); // Usar el temporizador con nulabilidad
+            poderDelayTimer?.Start();
         }
 
         private void OnPoderDelayElapsed(object? sender, ElapsedEventArgs e)
@@ -227,7 +243,7 @@ namespace proyecto
         {
             tieneEscudo = true;
 
-            escudoTimer = new System.Timers.Timer(duracion * 1000); // Especificar System.Timers.Timer
+            escudoTimer = new System.Timers.Timer(duracion * 1000);
             escudoTimer.Elapsed += (sender, e) => DesactivarEscudo();
             escudoTimer.AutoReset = false;
             escudoTimer.Start();
@@ -269,6 +285,7 @@ namespace proyecto
         private void StopMovement()
         {
             moveTimer.Stop();
+            ClearTrail(); // Clear the trail when the moto stops
             Debug.WriteLine("Moto detenida por falta de combustible");
         }
 
@@ -288,9 +305,11 @@ namespace proyecto
             if (nivelVelocidad < 1 || nivelVelocidad > 10)
             {
                 throw new ArgumentOutOfRangeException(nameof(nivelVelocidad), "Nivel de velocidad no válido. Debe estar entre 1 y 10.");
+
             }
 
-            return 1300 - (nivelVelocidad - 1) * 100;
+            return 1000 - (nivelVelocidad - 1) * 100;
         }
     }
 }
+

@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace proyecto
 {
@@ -24,10 +27,10 @@ namespace proyecto
         void Clear();
         int Count();
         void Print();
-        T this[int index] { get; } // Agregar definición del indexador en la interfaz
+        T this[int index] { get; }
     }
 
-    public class OwnLinkedList<T> : ILista<T>
+    public class OwnLinkedList<T> : ILista<T>, IEnumerable<T>
     {
         private ONode<T>? first;
 
@@ -138,7 +141,7 @@ namespace proyecto
             }
         }
 
-        public T this[int index] // Implementación del indexador
+        public T this[int index]
         {
             get
             {
@@ -171,9 +174,24 @@ namespace proyecto
             ONode<T>? current = this.first;
             while (current != null)
             {
-                Console.WriteLine(current.Value);
+                Debug.WriteLine(current.Value);
                 current = current.Next;
             }
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            ONode<T>? current = this.first;
+            while (current != null)
+            {
+                yield return current.Value;
+                current = current.Next;
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }
