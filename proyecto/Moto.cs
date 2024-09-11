@@ -24,7 +24,10 @@ namespace proyecto
 
         protected System.Timers.Timer moveTimer;
         private OwnQueueList<Item> itemsQueue;
-        private readonly OwnStackList<Poder> poderesStack;
+        private readonly OwnStackList<Poder> poderesStack; // Mantiene la pila de poderes
+
+        // Definimos un evento que se disparará cuando se recoja un poder
+        public event Action? OnPoderCollected;
 
         public Moto(Node startNode, int trailValue, int nivelVelocidad, int tamañoEstela, int trailHeadValue, int combustible = 100)
         {
@@ -40,7 +43,7 @@ namespace proyecto
             trailNodes = new OwnLinkedList<Node>();
             itemsQueue = new OwnQueueList<Item>();
 
-            poderesStack = new OwnStackList<Poder>();
+            poderesStack = new OwnStackList<Poder>(); // Inicializa la pila de poderes
             InitializePoderDelayTimer();
 
             moveTimer = new System.Timers.Timer(Velocidad);
@@ -103,7 +106,7 @@ namespace proyecto
             if (nextNode != null)
             {
                 HandleItem(nextNode);
-                HandlePoder(nextNode);
+                HandlePoder(nextNode); // Recolecta los poderes
                 UpdateTrail();
                 MoveToNextNode(nextNode);
                 UpdateCombustible();
@@ -180,13 +183,18 @@ namespace proyecto
             }
         }
 
+        // Manejamos la recolección de poderes y notificamos a Form1 para actualizar la UI
         private void HandlePoder(Node nextNode)
         {
             if (nextNode.Value >= 4 && nextNode.Value <= 5)
             {
                 Poder collectedPoder = GetPoderFromValue(nextNode.Value);
-                AplicarPoderConDelay(collectedPoder);
+                AddPoder(collectedPoder); // Agrega el poder a la pila
                 nextNode.Value = 0;
+
+                // Disparamos el evento para actualizar la interfaz
+                OnPoderCollected?.Invoke();
+                Debug.WriteLine("Poder recogido: " + collectedPoder);
             }
         }
 
@@ -211,24 +219,55 @@ namespace proyecto
             };
         }
 
+        // Método agregado para manejar la adición de poderes a la pila
+        public void AddPoder(Poder poder)
+        {
+            poderesStack.Push(poder);
+            Debug.WriteLine($"Poder agregado a la pila: {poder.GetType().Name}");
+        }
+
         private void ApplyItem(Item item)
         {
             item.Aplicar(this);
         }
 
-        public void AplicarPoderConDelay(Poder poder)
+        // Cambiado para aplicar el poder seleccionado
+        public void AplicarPoderConDelay(int selectedIndex)
         {
-            poderesStack.Push(poder);
-            poderDelayTimer?.Start();
+            // Utilizamos una pila auxiliar para extraer hasta el poder seleccionado
+            OwnStackList<Poder> auxStack = new OwnStackList<Poder>();
+
+            // Extraemos los poderes hasta llegar al índice seleccionado
+            for (int i = 0; i < PoderCount() - 1 - selectedIndex; i++)
+            {
+                auxStack.Push(poderesStack.Pop());
+            }
+
+            // Aplicamos el poder seleccionado
+            Poder selectedPoder = poderesStack.Pop();
+            selectedPoder.Aplicar(this);
+            Debug.WriteLine("Poder seleccionado aplicado: " + selectedPoder.GetType().Name);
+
+            // Restauramos los poderes que estaban encima del seleccionado
+            while (auxStack.Count() > 0)
+            {
+                poderesStack.Push(auxStack.Pop());
+            }
+
+            // Disparamos el evento para actualizar la UI después de aplicar el poder
+            OnPoderCollected?.Invoke();
         }
 
         private void OnPoderDelayElapsed(object? sender, ElapsedEventArgs e)
         {
             if (poderesStack.Count() > 0)
             {
-                Poder poder = poderesStack.Pop();
-                poder.Aplicar(this);
+                Poder poder = poderesStack.Pop(); // Elimina el poder de la pila
+                poder.Aplicar(this); // Aplica el poder
                 Debug.WriteLine("Poder aplicado después de 1 segundo de delay");
+
+                // Disparamos el evento para actualizar la interfaz de usuario
+                OnPoderCollected?.Invoke();
             }
         }
 
@@ -304,12 +343,22 @@ namespace proyecto
         {
             if (nivelVelocidad < 1 || nivelVelocidad > 10)
             {
-                throw new ArgumentOutOfRangeException(nameof(nivelVelocidad), "Nivel de velocidad no válido. Debe estar entre 1 y 10.");
-
+                throw new ArgumentException("El nivel de velocidad debe estar entre 1 y 10.");
             }
 
             return 1000 - (nivelVelocidad - 1) * 100;
         }
+
+        // Implementación del método PoderCount
+        public int PoderCount()
+        {
+            return poderesStack.Count();
+        }
+
+        // Implementación del método GetPoderAt
+        public Poder GetPoderAt(int index)
+        {
+            return poderesStack.Peek(index);
+        }
     }
 }
-
