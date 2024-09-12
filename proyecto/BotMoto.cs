@@ -7,41 +7,48 @@ namespace proyecto
     {
         private readonly Grid gameGrid;
         private readonly double decisionThreshold;
-        private Random rand;
+        private static readonly Random rand = new Random();  // Instancia única de Random
 
         public BotMoto(Node startNode, int trailValue, Grid grid, double decisionThreshold, int velocidad, int tamañoEstela, int trailHeadValue)
             : base(startNode, trailValue, velocidad, tamañoEstela, trailHeadValue)
         {
             this.gameGrid = grid;
             this.decisionThreshold = decisionThreshold;
-            this.rand = new Random();
         }
 
+        // Manejador del temporizador para movimiento
         protected override void OnMoveTimerElapsed(object? sender, ElapsedEventArgs e)
         {
-            // Decisión de cambio de dirección
-            if (rand.NextDouble() < decisionThreshold)
-            {
-                ChangeDirection(GetBestDirection());
-            }
+            // Decidir si cambiar de dirección basado en un número aleatorio
+            ChangeDirection(GetRandomDirection());
 
+            // Llamar al método de movimiento de la clase base
             base.OnMoveTimerElapsed(sender, e);
         }
 
-        
-
-
-        private Direction GetBestDirection()
+        // Escoge una dirección aleatoria simple
+        private Direction GetRandomDirection()
         {
-            // Aquí podrías implementar una lógica más avanzada para determinar la mejor dirección,
-            // como buscar al jugador más cercano o evitar obstáculos.
-            return RandomDirection();
+            int randomValue = rand.Next(100); // Genera un número aleatorio entre 0 y 99
+
+            // Basado en el valor de randomValue, elegimos una dirección
+            if (randomValue < 25)
+            {
+                return Direction.Up;   // 25% de probabilidad de ir hacia arriba
+            }
+            else if (randomValue < 50)
+            {
+                return Direction.Down; // 25% de probabilidad de ir hacia abajo
+            }
+            else if (randomValue < 75)
+            {
+                return Direction.Left; // 25% de probabilidad de ir a la izquierda
+            }
+            else
+            {
+                return Direction.Right; // 25% de probabilidad de ir a la derecha
+            }
         }
 
-        private Direction RandomDirection()
-        {
-            Array directions = Enum.GetValues(typeof(Direction));
-            return (Direction)directions.GetValue(rand.Next(directions.Length))!;
-        }
     }
 }
