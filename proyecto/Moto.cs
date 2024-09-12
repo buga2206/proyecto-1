@@ -20,7 +20,6 @@ namespace proyecto
         public int NivelVelocidad { get; private set; }
         private bool tieneEscudo;
         private System.Timers.Timer? escudoTimer;
-        private System.Timers.Timer? poderDelayTimer;
 
         protected System.Timers.Timer moveTimer;
         private OwnQueueList<Item> itemsQueue;
@@ -44,7 +43,6 @@ namespace proyecto
             itemsQueue = new OwnQueueList<Item>();
 
             poderesStack = new OwnStackList<Poder>(); // Inicializa la pila de poderes
-            InitializePoderDelayTimer();
 
             moveTimer = new System.Timers.Timer(Velocidad);
             moveTimer.Elapsed += OnMoveTimerElapsed;
@@ -53,12 +51,6 @@ namespace proyecto
             tieneEscudo = false;
         }
 
-        private void InitializePoderDelayTimer()
-        {
-            poderDelayTimer = new System.Timers.Timer(1000);
-            poderDelayTimer.Elapsed += OnPoderDelayElapsed;
-            poderDelayTimer.AutoReset = false;
-        }
 
         protected virtual void OnMoveTimerElapsed(object? sender, ElapsedEventArgs e)
         {
@@ -231,45 +223,42 @@ namespace proyecto
             item.Aplicar(this);
         }
 
-        // Cambiado para aplicar el poder seleccionado
+        // Método para aplicar un poder con un delay de 1 segundo
         public void AplicarPoderConDelay(int selectedIndex)
         {
-            // Utilizamos una pila auxiliar para extraer hasta el poder seleccionado
+            // Creamos una pila auxiliar para sacar los poderes que están sobre el seleccionado
             OwnStackList<Poder> auxStack = new OwnStackList<Poder>();
 
-            // Extraemos los poderes hasta llegar al índice seleccionado
+            // Movemos los poderes que están sobre el seleccionado a la pila auxiliar
             for (int i = 0; i < PoderCount() - 1 - selectedIndex; i++)
             {
                 auxStack.Push(poderesStack.Pop());
             }
 
-            // Aplicamos el poder seleccionado
+            // Extraemos el poder seleccionado
             Poder selectedPoder = poderesStack.Pop();
-            selectedPoder.Aplicar(this);
-            Debug.WriteLine("Poder seleccionado aplicado: " + selectedPoder.GetType().Name);
 
-            // Restauramos los poderes que estaban encima del seleccionado
+            // Restauramos los poderes a la pila original
             while (auxStack.Count() > 0)
             {
                 poderesStack.Push(auxStack.Pop());
             }
 
-            // Disparamos el evento para actualizar la UI después de aplicar el poder
-            OnPoderCollected?.Invoke();
-        }
-
-        private void OnPoderDelayElapsed(object? sender, ElapsedEventArgs e)
-        {
-            if (poderesStack.Count() > 0)
+            // Aplicamos un delay de 1 segundo antes de aplicar el poder
+            Task.Delay(1000).ContinueWith(_ =>
             {
-                Poder poder = poderesStack.Pop(); // Elimina el poder de la pila
-                poder.Aplicar(this); // Aplica el poder
+                // Después del delay, aplicamos el poder
+                selectedPoder.Aplicar(this);
+
+                // Mostrar mensaje en consola para debug
                 Debug.WriteLine("Poder aplicado después de 1 segundo de delay");
 
-                // Disparamos el evento para actualizar la interfaz de usuario
-                OnPoderCollected?.Invoke();
-            }
+                // Aquí puedes agregar cualquier lógica adicional para actualizar la UI o el estado del juego
+                OnPoderCollected?.Invoke(); // Evento para actualizar la UI, si es necesario
+            });
         }
+
+
 
         public void AplicarHiperVelocidad()
         {
