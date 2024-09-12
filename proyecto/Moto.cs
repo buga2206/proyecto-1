@@ -166,12 +166,21 @@ namespace proyecto
 
         private void HandleItem(Node nextNode)
         {
+            
             if (nextNode.Value >= 1 && nextNode.Value <= 3)
             {
-                Item collectedItem = GetItemFromValue(nextNode.Value);
-                itemsQueue.Enqueue(collectedItem);
-                ApplyItem(itemsQueue.Dequeue());
-                nextNode.Value = 0;
+                if (tieneEscudo)
+                {
+                    return;
+                }
+                else
+                {
+                    Item collectedItem = GetItemFromValue(nextNode.Value);
+                    itemsQueue.Enqueue(collectedItem);
+                    ApplyItem(itemsQueue.Dequeue());
+                    nextNode.Value = 0;
+                }
+                
             }
         }
 
@@ -335,7 +344,7 @@ namespace proyecto
                 throw new ArgumentException("El nivel de velocidad debe estar entre 1 y 10.");
             }
 
-            return 1000 - (nivelVelocidad - 1) * 100;
+            return 900 - (nivelVelocidad - 1) * 100;
         }
 
         // Implementación del método PoderCount

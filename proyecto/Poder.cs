@@ -17,7 +17,7 @@
     {
         private readonly int duracion;
 
-        public Escudo(int duracionSegundos = 5)
+        public Escudo(int duracionSegundos = 10)
         {
             duracion = duracionSegundos;
         }
