@@ -32,7 +32,7 @@ namespace proyecto
 
     public class OwnLinkedList<T> : ILista<T>, IEnumerable<T>
     {
-        private ONode<T>? first;
+        private ONode<T>? first;  // Referencia al primer nodo de la lista
 
         public OwnLinkedList()
         {
@@ -43,10 +43,10 @@ namespace proyecto
         {
             int count = 0;
             ONode<T>? current = this.first;
-            while (current != null)
+            while (current != null)  // Recorre la lista hasta el final
             {
                 count++;
-                current = current.Next;
+                current = current.Next;  // Avanza al siguiente nodo
             }
             return count;
         }
@@ -54,28 +54,28 @@ namespace proyecto
         public void AddFirst(T value)
         {
             ONode<T> newNode = new ONode<T>(value);
-            newNode.Next = this.first;
-            this.first = newNode;
+            newNode.Next = this.first;  // El nuevo nodo apunta al nodo actualmente primero
+            this.first = newNode;  // El nuevo nodo se convierte en el primero
         }
 
         public void AddLast(T value)
         {
-            if (this.first == null)
+            if (this.first == null)  // Si la lista está vacía, agrega el nodo como el primero
             {
                 this.first = new ONode<T>(value);
                 return;
             }
             ONode<T> current = this.first;
-            while (current.Next != null)
+            while (current.Next != null)  // Recorre la lista hasta el último nodo
             {
                 current = current.Next;
             }
-            current.Next = new ONode<T>(value);
+            current.Next = new ONode<T>(value);  // Agrega el nuevo nodo al final de la lista
         }
 
         public void Clear()
         {
-            this.first = null;
+            this.first = null;  // Establece la referencia del primer nodo a null, eliminando todos los nodos
         }
 
         public void RemoveFirst()
@@ -84,7 +84,7 @@ namespace proyecto
             {
                 return;
             }
-            this.first = this.first.Next;
+            this.first = this.first.Next;  // El primer nodo ahora es el siguiente nodo
         }
 
         public void RemoveLast()
@@ -94,28 +94,28 @@ namespace proyecto
                 return;
             }
 
-            if (this.first.Next == null)
+            if (this.first.Next == null)  // Si solo hay un nodo, elimina la lista
             {
                 this.first = null;
                 return;
             }
 
             ONode<T> current = this.first;
-            while (current.Next?.Next != null)
+            while (current.Next?.Next != null)  // Recorre hasta el penúltimo nodo
             {
                 current = current.Next;
             }
-            current.Next = null;
+            current.Next = null;  // Elimina la referencia al último nodo, eliminando el nodo
         }
 
         public void RemoveAt(int index)
         {
-            if (index < 0)
+            if (index < 0)  // Verifica si el índice es válido
             {
                 throw new ArgumentOutOfRangeException(nameof(index), "Index out of range.");
             }
 
-            if (index == 0)
+            if (index == 0)  // Si el índice es 0, elimina el primer nodo
             {
                 RemoveFirst();
                 return;
@@ -124,20 +124,20 @@ namespace proyecto
             ONode<T>? current = this.first;
             ONode<T>? previous = null;
 
-            for (int i = 0; i < index; i++)
+            for (int i = 0; i < index; i++)  // Recorre hasta llegar al nodo en la posición deseada
             {
-                if (current == null)
+                if (current == null)  // Si el índice está fuera de rango, lanza una excepción
                 {
                     throw new ArgumentOutOfRangeException(nameof(index), "Index out of range.");
                 }
 
-                previous = current;
-                current = current.Next;
+                previous = current;  // Guarda el nodo anterior
+                current = current.Next;  // Avanza al siguiente nodo
             }
 
-            if (previous != null && current != null)
+            if (previous != null && current != null)  // Si se encontraron los nodos, elimina el nodo en la posición
             {
-                previous.Next = current.Next;
+                previous.Next = current.Next;  // Salta el nodo actual, eliminandolo
             }
         }
 
@@ -145,53 +145,54 @@ namespace proyecto
         {
             get
             {
-                if (index < 0 || index >= Count())
+                if (index < 0 || index >= Count())  // Verifica si el índice está dentro de los 
                 {
                     throw new ArgumentOutOfRangeException(nameof(index), "Index out of range.");
                 }
 
                 ONode<T>? current = first;
-                for (int i = 0; i < index; i++)
+                for (int i = 0; i < index; i++)  // Recorre hasta llegar al nodo en el índice deseado
                 {
-                    if (current == null)
+                    if (current == null)  // Si el nodo es null, lanza una excepción
                     {
                         throw new ArgumentOutOfRangeException(nameof(index), "Index out of range.");
                     }
-                    current = current.Next;
+                    current = current.Next;  // Avanza al siguiente nodo
                 }
 
-                if (current == null)
+                if (current == null)  // Si no hay nodo en esa posición, lanza una excepción
                 {
                     throw new InvalidOperationException("Node is unexpectedly null.");
                 }
 
-                return current.Value;
+                return current.Value;  // Retorna el valor del nodo en la posición especificada
             }
         }
 
         public void Print()
         {
             ONode<T>? current = this.first;
-            while (current != null)
+            while (current != null)  // Recorre cada nodo de la lista
             {
-                Debug.WriteLine(current.Value);
-                current = current.Next;
+                Debug.WriteLine(current.Value);  // Imprime el valor del nodo
+                current = current.Next;  // Avanza al siguiente nodo
             }
         }
 
         public IEnumerator<T> GetEnumerator()
         {
             ONode<T>? current = this.first;
-            while (current != null)
+            while (current != null)  // Recorre cada nodo
             {
-                yield return current.Value;
-                current = current.Next;
+                yield return current.Value;  // Retorna el valor actual
+                current = current.Next;  // Avanza al siguiente nodo
             }
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()  // Implementación de IEnumerable para compatibilidad
         {
-            return GetEnumerator();
+            return GetEnumerator();  // Retorna el enumerador genérico
         }
     }
+    
 }

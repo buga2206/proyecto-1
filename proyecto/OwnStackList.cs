@@ -1,154 +1,102 @@
-﻿using System;
+﻿using System; 
 
-namespace proyecto
+namespace proyecto 
 {
-    internal class SNode<T>
+    internal class SNode<T>  
     {
-        internal T Value;
-        internal SNode<T>? Next;
+        internal T Value;  
+        internal SNode<T>? Next; 
 
-        public SNode(T value)
+        public SNode(T value) 
         {
-            this.Value = value;
-            this.Next = null;
+            this.Value = value; 
+            this.Next = null; 
         }
     }
 
-    public interface IStack<T>
+    public interface IStack<T> 
     {
-        void Push(T value);
+        void Push(T value); 
         T Pop();
-        T Peek();
-        T Peek(int index);
-        int Count();
-        void Clear();
-        void Swap(int index1, int index2);
+        T Peek();  
+        T Peek(int index);  
+        int Count();  
+        void Clear();  
     }
 
-    public class OwnStackList<T> : IStack<T>
+    public class OwnStackList<T> : IStack<T> 
     {
-        private SNode<T>? top;
+        private SNode<T>? top;  // Referencia al nodo superior de la pila
 
-        public OwnStackList()
+        public OwnStackList() 
         {
-            this.top = null;
+            this.top = null;  
         }
 
-        public int Count()
+        public int Count()  
         {
-            int count = 0;
-            SNode<T>? current = this.top;
-            while (current != null)
+            int count = 0;  
+            SNode<T>? current = this.top;  
+            while (current != null)  // Recorre la pila hasta que no haya más nodos
             {
-                count++;
+                count++; 
                 current = current.Next;
             }
-            return count;
+            return count;  // Retorna el número total de elementos
         }
 
-        public void Push(T value)
+        public void Push(T value)  
         {
-            SNode<T> newNode = new SNode<T>(value);
-            newNode.Next = this.top;
-            this.top = newNode;
+            SNode<T> newNode = new SNode<T>(value); 
+            newNode.Next = this.top;  // El nuevo nodo apunta al nodo superior actual
+            this.top = newNode;  // El nuevo nodo se convierte en el nodo superior
         }
 
-        public T Pop()
+        public T Pop() 
         {
-            if (this.top == null)
+            if (this.top == null)  
             {
                 throw new InvalidOperationException("Stack is empty.");
             }
 
-            T value = this.top.Value;
-            this.top = this.top.Next;
-            return value;
+            T value = this.top.Value;  // Obtiene el valor del nodo superior
+            this.top = this.top.Next;  // Actualiza el nodo superior al siguiente en la pila
+            return value;  // Retorna el valor del nodo que se eliminó
         }
 
-        public T Peek()
+        public T Peek() 
         {
-            if (this.top == null)
+            if (this.top == null) 
             {
-                throw new InvalidOperationException("Stack is empty.");
+                throw new InvalidOperationException("Stack is empty."); 
             }
 
-            return this.top.Value;
+            return this.top.Value;  // Retorna el valor del nodo superior
         }
 
-        public T Peek(int index)
+        public T Peek(int index) 
         {
-            if (index < 0 || index >= Count())
+            if (index < 0 || index >= Count())  // Verifica si el índice está fuera de los límites
             {
                 throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range.");
             }
 
-            SNode<T>? current = this.top;
-            for (int i = 0; i < index; i++)
+            SNode<T>? current = this.top; 
+            for (int i = 0; i < index; i++)  // Recorre la pila hasta llegar al índice deseado
             {
-                if (current == null)
+                if (current == null)  // Verifica si hay menos nodos de los esperados
                 {
-                    throw new InvalidOperationException("Stack is shorter than expected.");
+                    throw new InvalidOperationException("Stack is shorter than expected."); 
                 }
                 current = current.Next;
             }
 
-            return current!.Value;.
+            return current!.Value;  // Retorna el valor en la posición especificada
         }
 
-        public void Clear()
+        public void Clear() 
         {
-            this.top = null;
-        }
-
-        public void Swap(int index1, int index2)
-        {
-            if (index1 < 0 || index2 < 0 || index1 >= Count() || index2 >= Count())
-            {
-                throw new ArgumentOutOfRangeException("Index out of range.");
-            }
-
-            if (index1 == index2) return;
-
-            SNode<T>? node1 = top;
-            SNode<T>? node2 = top;
-            SNode<T>? prevNode1 = null;
-            SNode<T>? prevNode2 = null;
-
-            for (int i = 0; i < index1; i++)
-            {
-                prevNode1 = node1;
-                node1 = node1?.Next;
-            }
-
-            for (int i = 0; i < index2; i++)
-            {
-                prevNode2 = node2;
-                node2 = node2?.Next;
-            }
-
-            if (node1 == null || node2 == null) return;
-
-            if (prevNode1 != null)
-            {
-                prevNode1.Next = node2;
-            }
-            else
-            {
-                top = node2;
-            }
-
-            if (prevNode2 != null)
-            {
-                prevNode2.Next = node1;
-            }
-            else
-            {
-                top = node1;
-            }
-
-            SNode<T>? temp = node1.Next;
-            node1.Next = node2.Next;
-            node2.Next = temp;
+            this.top = null; 
         }
     }
 }
