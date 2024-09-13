@@ -19,7 +19,8 @@ namespace proyecto
         public int NivelVelocidad; 
         private bool tieneEscudo; 
         private System.Timers.Timer? escudoTimer; 
-        protected System.Timers.Timer moveTimer;  
+        protected System.Timers.Timer moveTimer;
+        private System.Timers.Timer? hipervelocidadTimer;
         private OwnQueueList<Item> itemsQueue;  
         private readonly OwnStackList<Poder> poderesStack;
         public event Action? OnPoderCollected;
@@ -38,6 +39,7 @@ namespace proyecto
             trailNodes = new OwnLinkedList<Node>();
             itemsQueue = new OwnQueueList<Item>(); 
             poderesStack = new OwnStackList<Poder>();
+            hipervelocidadTimer = null;
 
             moveTimer = new System.Timers.Timer(Velocidad);
             moveTimer.Elapsed += OnMoveTimerElapsed;
@@ -260,11 +262,34 @@ namespace proyecto
             });
         }
 
-        public void AplicarHiperVelocidad() 
+        public void ActivarHiperVelocidad(int duracion)
         {
-            NivelVelocidad = Math.Min(NivelVelocidad + 4, 10);  // Incrementa el nivel de velocidad, pero no más de 10
-            Velocidad = GetVelocidadPorNivel(NivelVelocidad);  // Actualiza la velocidad según el nivel
+            NivelVelocidad = Math.Min(NivelVelocidad + 4, 10);  // Incrementa el nivel de velocidad
+            Velocidad = GetVelocidadPorNivel(NivelVelocidad); 
             moveTimer.Interval = Velocidad;  
+
+            // Si el temporizador ya estaba corriendo, lo reiniciamos
+            if (hipervelocidadTimer != null)
+            {
+                hipervelocidadTimer.Stop();
+                hipervelocidadTimer.Dispose();
+            }
+
+            hipervelocidadTimer = new System.Timers.Timer(duracion * 1000);
+            hipervelocidadTimer.Elapsed += (sender, e) => DesactivarHiperVelocidad();  // Asociamos el evento para desactivar la hipervelocidad
+            hipervelocidadTimer.AutoReset = false;  
+            hipervelocidadTimer.Start(); 
+        }
+
+        private void DesactivarHiperVelocidad()
+        {
+            NivelVelocidad = Math.Max(NivelVelocidad - 4, 1);  // Reduce el nivel de velocidad al valor anterior (o 1 si es el mínimo)
+            Velocidad = GetVelocidadPorNivel(NivelVelocidad);
+            moveTimer.Interval = Velocidad; 
+
+            hipervelocidadTimer?.Stop(); 
+            hipervelocidadTimer?.Dispose(); 
+            hipervelocidadTimer = null;  // Reinicia la referencia al temporizador
         }
 
         public void ActivarEscudo(int duracion)

@@ -5,21 +5,28 @@
         public abstract void Aplicar(Moto moto);  
     }
 
-    public class HiperVelocidad : Poder 
+    public class HiperVelocidad : Poder
     {
-        public override void Aplicar(Moto moto)  
+        private readonly int duracion;  
+
+        public HiperVelocidad(int duracionSegundos = 5) 
         {
-            moto.AplicarHiperVelocidad();  // Llama al método de la moto para aplicar el efecto de hiper velocidad
+            duracion = duracionSegundos;  
+        }
+
+        public override void Aplicar(Moto moto) 
+        {
+            moto.ActivarHiperVelocidad(duracion);  // Aplica la hipervelocidad en la moto durante el tiempo especificado
         }
     }
 
     public class Escudo : Poder 
     {
-        private readonly int duracion;  // Campo para almacenar la duración del escudo en segundos
+        private readonly int duracion; 
 
         public Escudo(int duracionSegundos = 5) 
         {
-            duracion = duracionSegundos;  // Asigna la duración del escudo
+            duracion = duracionSegundos;  
         }
 
         public override void Aplicar(Moto moto)  

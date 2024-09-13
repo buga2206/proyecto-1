@@ -267,7 +267,7 @@ namespace proyecto
                                     currentNode.Value = 3;  // Bomba
                                     break;
                                 case 4:
-                                    currentNode.Value = 4;  // (Hiper velocidad
+                                    currentNode.Value = 4;  // Hiper velocidad
                                     break;
                                 case 5:
                                     currentNode.Value = 5;  // Escudo
