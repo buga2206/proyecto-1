@@ -13,16 +13,13 @@ namespace proyecto
         private Moto player1;
         private List<BotMoto> bots;
         private const int GridRows = 40;
-        private const int GridColumns = 40;
+        private const int GridColumns = 60;
         private PictureBox[,] pictureBoxes;
         private Dictionary<int, Image> imageCache;
-
         private System.Timers.Timer startDelayTimer;
         private bool canMove;
-
-        // Nueva lista de PictureBoxes para visualizar los poderes
         private List<PictureBox> poderesPictureBoxes;
-        private int currentPoderIndex; // Índice del selector en la lista de poderes
+        private int currentPoderIndex;
 
         public Form1()
         {
@@ -45,149 +42,36 @@ namespace proyecto
 
             InitializeStartDelay();
 
-            // Inicialización de los PictureBoxes para los poderes
             InitializePoderesPictureBoxes();
 
             this.KeyDown += new KeyEventHandler(Form1_KeyDown);
             this.Focus();
         }
 
-        // Método para inicializar los PictureBoxes de los poderes
-        private void InitializePoderesPictureBoxes()
-        {
-            poderesPictureBoxes = new List<PictureBox>();
-            currentPoderIndex = -1; // Inicialmente no hay poderes
-
-            // Crear un panel en la interfaz para los poderes
-            Panel poderPanel = new Panel
-            {
-                Location = new Point(10, 10), // Ajustar posición en la pantalla
-                Size = new Size(35, 400), // Tamaño inicial
-                BorderStyle = BorderStyle.FixedSingle
-            };
-            this.Controls.Add(poderPanel);
-
-            // Inicialmente agregamos un solo PictureBox vacío
-            AddEmptyPictureBox(poderPanel);
-            Debug.WriteLine("PictureBox inicializado con uno vacío");
-        }
-
-        // Método para agregar un PictureBox vacío
-        private void AddEmptyPictureBox(Panel panel)
-        {
-            PictureBox poderBox = new PictureBox
-            {
-                Size = new Size(22, 22), // Tamaño de 15x15 píxeles
-                Location = new Point(5, poderesPictureBoxes.Count * 20), // Espaciado dinámico
-                BorderStyle = BorderStyle.FixedSingle,
-                SizeMode = PictureBoxSizeMode.CenterImage, // Centrar la imagen
-                BackColor = Color.Transparent // Fondo transparente
-            };
-
-            panel.Controls.Add(poderBox);
-            poderesPictureBoxes.Add(poderBox);
-        }
-
-        // Actualiza las imágenes de los poderes recolectados en los PictureBoxes
-        public void UpdatePoderesUI()
-        {
-            // Asegura que cualquier actualización de la UI se realice en el hilo principal
-            if (this.InvokeRequired)
-            {
-                this.Invoke(new Action(UpdatePoderesUI));
-                return;
-            }
-
-            Debug.WriteLine("Actualizando los PictureBox de poderes...");
-
-            Panel poderPanel = (Panel)poderesPictureBoxes[0].Parent;
-
-            // Asegura que haya un PictureBox para cada poder en la pila
-            while (player1.PoderCount() > poderesPictureBoxes.Count)
-            {
-                AddEmptyPictureBox(poderPanel); // Agrega un nuevo PictureBox si es necesario
-            }
-
-            // Actualizamos las imágenes de los poderes recolectados
-            for (int i = 0; i < player1.PoderCount(); i++)
-            {
-                Poder poder = player1.GetPoderAt(i);
-                int poderValue = (poder is HiperVelocidad) ? 4 : 5; // Asigna el valor de la imagen
-                poderesPictureBoxes[i].Image = imageCache[poderValue];
-                Debug.WriteLine($"Poder visualizado en PictureBox [{i}]: {poder.GetType().Name}");
-            }
-
-            // Limpia los PictureBox que no estén en uso
-            for (int i = player1.PoderCount(); i < poderesPictureBoxes.Count; i++)
-            {
-                poderesPictureBoxes[i].Image = null;
-                Debug.WriteLine($"PictureBox [{i}] vacío.");
-            }
-        }
-
-        private void InitializeStartDelay()
-        {
-            canMove = false;
-            startDelayTimer = new System.Timers.Timer(7000); // 7 segundos de retraso
-            startDelayTimer.Elapsed += OnStartDelayElapsed;
-            startDelayTimer.AutoReset = false;
-            startDelayTimer.Start();
-        }
-
-        private void OnStartDelayElapsed(object? sender, ElapsedEventArgs e)
-        {
-            canMove = true;
-
-            player1.StartTimer();  // Inicia el movimiento de la moto 1
-
-            foreach (var bot in bots)
-            {
-                bot.StartTimer();  // Inicia el movimiento de los bots
-            }
-
-            // Asegura que se actualice la interfaz después de que se pueda mover
-            this.Invoke(new Action(() => RenderGrid()));
-        }
-
         private Dictionary<int, Image> LoadImageCache()
         {
+
             return new Dictionary<int, Image>
             {
-                { 0, Image.FromFile("C:\\Users\\User\\desktop\\Datos 1\\proyecto-1\\proyecto-1\\proyecto\\Resources\\emptySpace.png") },
-                { 1, Image.FromFile("C:\\Users\\User\\desktop\\Datos 1\\proyecto-1\\proyecto-1\\proyecto\\Resources\\Items\\gas.png") },
-                { 2, Image.FromFile("C:\\Users\\User\\desktop\\Datos 1\\proyecto-1\\proyecto-1\\proyecto\\Resources\\Items\\trailGrowth.png") },
-                { 3, Image.FromFile("C:\\Users\\User\\desktop\\Datos 1\\proyecto-1\\proyecto-1\\proyecto\\Resources\\Items\\bomb.png") },
-                { 4, Image.FromFile("C:\\Users\\User\\desktop\\Datos 1\\proyecto-1\\proyecto-1\\proyecto\\Resources\\Powers\\hiperVelocity.png") },
-                { 5, Image.FromFile("C:\\Users\\User\\desktop\\Datos 1\\proyecto-1\\proyecto-1\\proyecto\\Resources\\Powers\\shield.png") },
-                { 6, Image.FromFile("C:\\Users\\User\\desktop\\Datos 1\\proyecto-1\\proyecto-1\\proyecto\\Resources\\BotsHead\\bot1Head.png") },
-                { 7, Image.FromFile("C:\\Users\\User\\desktop\\Datos 1\\proyecto-1\\proyecto-1\\proyecto\\Resources\\BotsHead\\bot2Head.png") },
-                { 8, Image.FromFile("C:\\Users\\User\\desktop\\Datos 1\\proyecto-1\\proyecto-1\\proyecto\\Resources\\BotsHead\\bot3Head.png") },
-                { 9, Image.FromFile("C:\\Users\\User\\desktop\\Datos 1\\proyecto-1\\proyecto-1\\proyecto\\Resources\\BotsHead\\bot4Head.png") },
-                { 10, Image.FromFile("C:\\Users\\User\\desktop\\Datos 1\\proyecto-1\\proyecto-1\\proyecto\\Resources\\BotsBody\\bot1Body.png") },
-                { 11, Image.FromFile("C:\\Users\\User\\desktop\\Datos 1\\proyecto-1\\proyecto-1\\proyecto\\Resources\\BotsBody\\bot2Body.png") },
-                { 12, Image.FromFile("C:\\Users\\User\\desktop\\Datos 1\\proyecto-1\\proyecto-1\\proyecto\\Resources\\BotsBody\\bot3Body.png") },
-                { 13, Image.FromFile("C:\\Users\\User\\desktop\\Datos 1\\proyecto-1\\proyecto-1\\proyecto\\Resources\\BotsBody\\bot4Body.png") },
-                { 14, Image.FromFile("C:\\Users\\User\\desktop\\Datos 1\\proyecto-1\\proyecto-1\\proyecto\\Resources\\PlayersHead\\Player1Head.png") },
-                { 15, Image.FromFile("C:\\Users\\User\\desktop\\Datos 1\\proyecto-1\\proyecto-1\\proyecto\\Resources\\PlayersBody\\Player1Body.png") },
+                { 0, Image.FromFile("Resources/emptySpace.png") },
+                { 1, Image.FromFile("Resources/Items/gas.png") },
+                { 2, Image.FromFile("Resources/Items/trailGrowth.png") },
+                { 3, Image.FromFile("Resources/Items/bomb.png") },
+                { 4, Image.FromFile("Resources/Powers/hiperVelocity.png") },
+                { 5, Image.FromFile("Resources/Powers/shield.png") },
+                { 6, Image.FromFile("Resources/BotsHead/bot1Head.png") },
+                { 7, Image.FromFile("Resources/BotsHead/bot2Head.png") },
+                { 8, Image.FromFile("Resources/BotsHead/bot3Head.png") },
+                { 9, Image.FromFile("Resources/BotsHead/bot4Head.png") },
+                { 10, Image.FromFile("Resources/BotsBody/bot1Body.png") },
+                { 11, Image.FromFile("Resources/BotsBody/bot2Body.png") },
+                { 12, Image.FromFile("Resources/BotsBody/bot3Body.png") },
+                { 13, Image.FromFile("Resources/BotsBody/bot4Body.png") },
+                { 14, Image.FromFile("Resources/PlayersHead/Player1Head.png") },
+                { 15, Image.FromFile("Resources/PlayersBody/Player1Body.png") },
             };
         }
 
-        private void InitializePlayer1()
-        {
-            Node? startNode = gameGrid.GetNode(5, 5);
-            if (startNode == null)
-            {
-                Debug.WriteLine("No se pudo iniciar el player 1");
-            }
-            else
-            {
-                player1 = new Moto(startNode, 15, 3, 3, 14); // Nivel 3 de velocidad
-
-                // Suscribimos el evento al recoger un poder
-                player1.OnPoderCollected += UpdatePoderesUI;
-                Debug.WriteLine("Moto inicializada en la posición (5, 5)");
-            }
-        }
 
         private void InitializeGrid()
         {
@@ -210,7 +94,7 @@ namespace proyecto
                     {
                         Width = cellSize,
                         Height = cellSize,
-                        Location = new Point(borderWidth, borderWidth), // Ubicación dentro del panel
+                        Location = new Point(borderWidth, borderWidth),
                         BorderStyle = BorderStyle.None
                     };
 
@@ -251,48 +135,91 @@ namespace proyecto
             }
         }
 
-        private void Form1_Resize(object sender, EventArgs e)
+        public void RenderGrid()
         {
-            CenterGrid();
+            for (int row = 0; row < GridRows; row++)
+            {
+                for (int col = 0; col < GridColumns; col++)
+                {
+                    Node? currentNode = gameGrid.GetNode(row, col);
+                    if (currentNode == null) continue;
+
+                    PictureBox cellBox = pictureBoxes[row, col];
+                    if (cellBox == null)
+                    {
+                        throw new InvalidOperationException($"PictureBox at [{row},{col}] is null in RenderGrid.");
+                    }
+
+                    if (cellBox.Image == null || cellBox.Image.Tag == null || (int)cellBox.Image.Tag != currentNode.Value)
+                    {
+                        cellBox.Image = imageCache[currentNode.Value];
+                        cellBox.Image.Tag = currentNode.Value;
+                    }
+                }
+            }
+        }
+
+        private void InitializePlayer1()
+        {
+            int rowPosition = (GridRows / 8);
+            int colPosition = (GridColumns / 2);
+            Node? startNode = gameGrid.GetNode(rowPosition, colPosition);
+            if (startNode == null)
+            {
+                throw new NullReferenceException("No se pudo iniciar el player 1");
+            }
+            else
+            {
+                player1 = new Moto(startNode, 15, 6, 3, 14);
+                player1.OnPoderCollected += UpdatePoderesUI;
+            }
         }
 
         private void InitializeBots()
         {
-            Node? botStartNode1 = gameGrid.GetNode(20, 10);
-            Node? botStartNode2 = gameGrid.GetNode(20, 20);
-            Node? botStartNode3 = gameGrid.GetNode(20, 30);
-            Node? botStartNode4 = gameGrid.GetNode(20, 5);
+            int rowPositionBot1 = GridRows / 4;
+            int colPositionBot1 = GridColumns / 4;
+
+            int rowPositionBot2 = GridRows / 4;
+            int colPositionBot2 = 3 * (GridColumns / 4);
+
+            int rowPositionBot3 = 3 * (GridRows / 4);
+            int colPositionBot3 = GridColumns / 4;
+
+            int rowPositionBot4 = 3 * (GridRows / 4);
+            int colPositionBot4 = 3 * (GridColumns / 4);
+
+            Node? botStartNode1 = gameGrid.GetNode(rowPositionBot1, colPositionBot1);
+            Node? botStartNode2 = gameGrid.GetNode(rowPositionBot2, colPositionBot2);
+            Node? botStartNode3 = gameGrid.GetNode(rowPositionBot3, colPositionBot3);
+            Node? botStartNode4 = gameGrid.GetNode(rowPositionBot4, colPositionBot4);
 
             if (botStartNode1 != null)
             {
-                BotMoto bot1 = new BotMoto(botStartNode1, 6, gameGrid, 0.1, 3, 3, 10); // Nivel 3 de velocidad
+                BotMoto bot1 = new BotMoto(botStartNode1, 6, 3, 3, 10);
                 bot1.ChangeDirection(Direction.Left);
                 bots.Add(bot1);
-                Debug.WriteLine("Bot 1 inicializado");
             }
 
             if (botStartNode2 != null)
             {
-                BotMoto bot2 = new BotMoto(botStartNode2, 7, gameGrid, 0.1, 4, 3, 11); // Nivel 4 de velocidad
+                BotMoto bot2 = new BotMoto(botStartNode2, 7, 4, 3, 11);
                 bot2.ChangeDirection(Direction.Up);
                 bots.Add(bot2);
-                Debug.WriteLine("Bot 2 inicializado");
             }
 
             if (botStartNode3 != null)
             {
-                BotMoto bot3 = new BotMoto(botStartNode3, 8, gameGrid, 0.1, 2, 3, 12); // Nivel 2 de velocidad
+                BotMoto bot3 = new BotMoto(botStartNode3, 8, 2, 3, 12);
                 bot3.ChangeDirection(Direction.Right);
                 bots.Add(bot3);
-                Debug.WriteLine("Bot 3 inicializado");
             }
 
             if (botStartNode4 != null)
             {
-                BotMoto bot4 = new BotMoto(botStartNode4, 9, gameGrid, 0.1, 5, 3, 13); // Nivel 5 de velocidad
+                BotMoto bot4 = new BotMoto(botStartNode4, 9, 5, 3, 13);
                 bot4.ChangeDirection(Direction.Down);
                 bots.Add(bot4);
-                Debug.WriteLine("Bot 4 inicializado");
             }
         }
 
@@ -334,13 +261,94 @@ namespace proyecto
                     }
                 }
             }
-
             RenderGrid();
         }
 
+        private void InitializeStartDelay()
+        {
+            canMove = false;
+            startDelayTimer = new System.Timers.Timer(7000); // 7 segundos de retraso
+            startDelayTimer.Elapsed += OnStartDelayElapsed;
+            startDelayTimer.AutoReset = false;
+            startDelayTimer.Start();
+        }
+
+        private void InitializePoderesPictureBoxes()
+        {
+            poderesPictureBoxes = new List<PictureBox>();
+            currentPoderIndex = -1; 
+
+            Panel poderPanel = new Panel
+            {
+                Location = new Point(10, 10), 
+                Size = new Size(35, 400), 
+                BorderStyle = BorderStyle.FixedSingle
+            };
+            this.Controls.Add(poderPanel);
+
+            AddEmptyPictureBox(poderPanel);
+        }
+
+        private void AddEmptyPictureBox(Panel panel)
+        {
+            PictureBox poderBox = new PictureBox
+            {
+                Size = new Size(22, 22),
+                Location = new Point(5, poderesPictureBoxes.Count * 20),
+                BorderStyle = BorderStyle.FixedSingle,
+                SizeMode = PictureBoxSizeMode.CenterImage,
+                BackColor = Color.Transparent
+            };
+
+            panel.Controls.Add(poderBox);
+            poderesPictureBoxes.Add(poderBox);
+        }
+
+        public void UpdatePoderesUI()
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(UpdatePoderesUI));
+                return;
+            }
+
+            Panel poderPanel = (Panel)poderesPictureBoxes[0].Parent;
+
+            while (player1.PoderCount() > poderesPictureBoxes.Count)
+            {
+                AddEmptyPictureBox(poderPanel);
+            }
+
+            for (int i = 0; i < player1.PoderCount(); i++)
+            {
+                Poder poder = player1.GetPoderAt(i);
+                int poderValue = (poder is HiperVelocidad) ? 4 : 5;
+                poderesPictureBoxes[i].Image = imageCache[poderValue];
+            }
+
+            for (int i = player1.PoderCount(); i < poderesPictureBoxes.Count; i++)
+            {
+                poderesPictureBoxes[i].Image = null;
+            }
+        }    
+
+        private void OnStartDelayElapsed(object? sender, ElapsedEventArgs e)
+        {
+            canMove = true;
+
+            player1.StartTimer();
+
+            foreach (var bot in bots)
+            {
+                bot.StartTimer();
+            }
+
+            this.Invoke(new Action(() => RenderGrid()));
+        }
+    
         private void Form1_KeyDown(object? sender, KeyEventArgs e)
         {
-            if (canMove) // Solo permite movimiento si el contador ha terminado
+            if (canMove) 
             {
                 HandlePlayer1KeyDown(e);
                 HandlePowerSelectionKeyDown(e);
@@ -372,12 +380,10 @@ namespace proyecto
                 if (IsValidDirectionChange(player1.CurrentDirection, newDirection))
                 {
                     player1.ChangeDirection(newDirection);
-                    Debug.WriteLine($"Jugador cambió de dirección a {newDirection}");
                 }
             }
         }
 
-        // Implementación de IsValidDirectionChange
         private bool IsValidDirectionChange(Direction currentDirection, Direction newDirection)
         {
             return (currentDirection == Direction.Left && newDirection != Direction.Right) ||
@@ -386,7 +392,6 @@ namespace proyecto
                    (currentDirection == Direction.Down && newDirection != Direction.Up);
         }
 
-        // Manejo de las teclas para selección de poderes
         private void HandlePowerSelectionKeyDown(KeyEventArgs e)
         {
             switch (e.KeyCode)
@@ -401,98 +406,66 @@ namespace proyecto
                     ApplySelectedPower();
                     break;
                 default:
-                    Debug.WriteLine($"Tecla no reconocida para selección de poder: {e.KeyCode}");
+                    Debug.WriteLine("Tecla no reconocida");
                     break;
             }
         }
 
-        // Mueve el selector hacia arriba
         private void MovePowerSelectorUp()
         {
             if (currentPoderIndex > 0)
             {
                 currentPoderIndex--;
                 HighlightSelectedPower();
-                Debug.WriteLine($"Selector de poder movido hacia arriba. Índice actual: {currentPoderIndex}");
             }
             else
             {
-                Debug.WriteLine("No hay más poderes arriba para seleccionar.");
+                return;
             }
         }
 
-        // Mueve el selector hacia abajo
         private void MovePowerSelectorDown()
         {
             if (currentPoderIndex < player1.PoderCount() - 1)
             {
                 currentPoderIndex++;
                 HighlightSelectedPower();
-                Debug.WriteLine($"Selector de poder movido hacia abajo. Índice actual: {currentPoderIndex}");
             }
             else
             {
-                Debug.WriteLine("No hay más poderes abajo para seleccionar.");
+                return;
             }
         }
 
-        // Aplica el poder seleccionado
         private void ApplySelectedPower()
         {
             if (currentPoderIndex >= 0 && player1.PoderCount() > 0)
             {
-                player1.AplicarPoderConDelay(currentPoderIndex); // Pasa el índice seleccionado
-                Debug.WriteLine($"Poder aplicado desde índice: {currentPoderIndex}");
+                player1.AplicarPoderConDelay(currentPoderIndex);
             }
             else
             {
-                Debug.WriteLine("No hay más poderes para aplicar.");
+                return;
             }
         }
 
-        // Resalta el poder actualmente seleccionado en el PictureBox
         private void HighlightSelectedPower()
         {
             for (int i = 0; i < poderesPictureBoxes.Count; i++)
             {
                 if (i == currentPoderIndex)
                 {
-                    poderesPictureBoxes[i].BackColor = Color.Cyan; // Resalta el poder seleccionado
-                    poderesPictureBoxes[i].BorderStyle = BorderStyle.FixedSingle; // Borde visible para el seleccionado
+                    poderesPictureBoxes[i].BackColor = Color.Cyan;
+                    poderesPictureBoxes[i].BorderStyle = BorderStyle.FixedSingle;
                 }
                 else
                 {
-                    poderesPictureBoxes[i].BackColor = Color.Transparent; // Restaura los no seleccionados
-                    poderesPictureBoxes[i].BorderStyle = BorderStyle.None; // Sin borde para no seleccionados
-                }
-            }
-            Debug.WriteLine("Poderes actualizados visualmente en los PictureBoxes");
-        }
-
-        public void RenderGrid()
-        {
-            for (int row = 0; row < GridRows; row++)
-            {
-                for (int col = 0; col < GridColumns; col++)
-                {
-                    Node? currentNode = gameGrid.GetNode(row, col);
-                    if (currentNode == null) continue;
-
-                    PictureBox cellBox = pictureBoxes[row, col];
-                    if (cellBox == null)
-                    {
-                        throw new InvalidOperationException($"PictureBox at [{row},{col}] is null in RenderGrid.");
-                    }
-
-                    if (cellBox.Image == null || cellBox.Image.Tag == null || (int)cellBox.Image.Tag != currentNode.Value)
-                    {
-                        cellBox.Image = imageCache[currentNode.Value];
-                        cellBox.Image.Tag = currentNode.Value;
-                    }
+                    poderesPictureBoxes[i].BackColor = Color.Transparent;
+                    poderesPictureBoxes[i].BorderStyle = BorderStyle.None;
                 }
             }
         }
-
+        
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             if (player1 != null)

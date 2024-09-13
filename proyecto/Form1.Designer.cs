@@ -38,7 +38,7 @@ namespace proyecto
             this.ClientSize = new System.Drawing.Size(1100, 700);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
-            this.BackColor = System.Drawing.Color.FromArgb(0, 0, 0);  // Color negro
+            this.BackColor = System.Drawing.Color.FromArgb(0, 0, 35);
             this.Name = "Form1";
             this.Text = "Tron by Burger";
             this.ResumeLayout(false);

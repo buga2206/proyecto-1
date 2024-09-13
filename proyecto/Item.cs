@@ -9,7 +9,7 @@
     {
         public override void Aplicar(Moto moto)
         {
-            moto.IncrementarCombustible(20);  // Aumenta el combustible en 20 unidades, sin exceder 100
+            moto.IncrementarCombustible(20);
         }
     }
 

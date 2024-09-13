@@ -2,12 +2,12 @@
 {
     public class Node
     {
-        public Node? Up { get; set; }
-        public Node? Down { get; set; }
-        public Node? Left { get; set; }
-        public Node? Right { get; set; }
+        public Node? Up;
+        public Node? Down;
+        public Node? Left;
+        public Node? Right;
 
-        public int Value { get; set; } // Valores de 0 a 5 que representan el estado del nodo
+        public int Value;
 
         public Node(int value)
         {
@@ -35,7 +35,7 @@
             {
                 for (int col = 0; col < columns; col++)
                 {
-                    nodes[row, col] = new Node(0); // Inicialmente todos vacíos (valor 0)
+                    nodes[row, col] = new Node(0);
                 }
             }
 
@@ -66,7 +66,7 @@
             {
                 for (int col = 0; col < columns; col++)
                 {
-                    nodes[row, col].Value = 0; // Resetea cada nodo a vacío
+                    nodes[row, col].Value = 0;
                 }
             }
         }
@@ -77,7 +77,7 @@
             {
                 return nodes[row, col];
             }
-            return null; // Devuelve null si las coordenadas están fuera del rango
+            return null;
         }
     }
 

@@ -19,7 +19,7 @@ namespace proyecto
         void Push(T value);
         T Pop();
         T Peek();
-        T Peek(int index); // Nuevo método para obtener un elemento en un índice específico
+        T Peek(int index);
         int Count();
         void Clear();
         void Swap(int index1, int index2);
@@ -92,7 +92,7 @@ namespace proyecto
                 current = current.Next;
             }
 
-            return current!.Value; // Aquí se garantiza que current no es null debido a la verificación previa.
+            return current!.Value;.
         }
 
         public void Clear()
@@ -107,7 +107,7 @@ namespace proyecto
                 throw new ArgumentOutOfRangeException("Index out of range.");
             }
 
-            if (index1 == index2) return; // No need to swap if indices are the same
+            if (index1 == index2) return;
 
             SNode<T>? node1 = top;
             SNode<T>? node2 = top;
@@ -146,7 +146,6 @@ namespace proyecto
                 top = node1;
             }
 
-            // Swap the next pointers
             SNode<T>? temp = node1.Next;
             node1.Next = node2.Next;
             node2.Next = temp;
