@@ -166,9 +166,13 @@ namespace proyecto
             };
         }
 
-        private void ApplyItem(Item item) 
+        private void ApplyItem(Item item)
         {
-            item.Aplicar(this); 
+            Task.Delay(1000).ContinueWith(_ =>  // Aplica el Item después de 1 segundo de retraso
+            {
+                item.Aplicar(this);  // Aplica el Item a la moto
+
+            });
         }
 
         private void HandlePoder(Node nextNode)
